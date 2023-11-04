@@ -40,7 +40,7 @@ html{
 .output{
     margin: 0 auto;
     
-    background-color: #858f84;
+    background-color: #b6c4b5;
     border-radius: 20px;
     width: 97%;
 }  
@@ -156,7 +156,7 @@ html{
 }
 
 .row button:hover{
-    background-color: #00000083;
+    background-color: #e2b8b883;
 }
 
 .btm .row .warn:hover{
@@ -172,7 +172,19 @@ html{
 
 .scrollable{
     width: 585px;
-    background-color: #00000083;
+    
+    background-color: transparent;
     white-space: nowrap;
-    overflow-x:auto; 
+    overflow-x: auto; 
+}
+
+.display{
+    height: 100%;
+    width: 585px;
+    background-color: transparent;
+    border: none;
+    overflow-x: auto; 
+    font-size: larger;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    
 }
