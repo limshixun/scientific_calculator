@@ -1,12 +1,15 @@
 const input_button_elem = document.querySelector(".input")
 const output_display_elem =document.querySelector(".display")
 const output_ans_elem  =document.querySelector(".value")
-const ans = 0;
+var ans = 0;
 
 memory ={
     operation: [],
-    formula: []
+    formula: [],
+    M: 0,
 }
+
+modes = [];
 
 input_button_elem.addEventListener("click", event =>{
     const target = event.target;
@@ -30,7 +33,7 @@ input_button_elem.addEventListener("click", event =>{
 
 function updateDisplay(symbol, formula){
     const currentValue = output_display_elem.value || '';
-    setOutput_display_elem(currentValue + symbol);
+    setOutput_display(currentValue + symbol);
 
     // allow the display to follow the content
     output_display_elem.scrollLeft = output_display_elem.scrollWidth;
@@ -38,17 +41,17 @@ function updateDisplay(symbol, formula){
 }
 
 function updateResult(value){
-    setOutput_ans_elem(value)
+    setOutput_ans(value)
     console.log("updateResult:", output_ans_elem.innerHTML)
-    ans = value
+    setAns(value);
 }
 
 function calculate(){
-    if(memory.formula == []){
+    if(memory.formula != []){
         const str = memory.formula.join("")
         console.log("formula: ", str)
         result =  eval(str);
-        ans = result;
+        setAns(result);
         updateResult(result);
     }else (console.log("Nothing to calculate"))
 }
@@ -60,7 +63,7 @@ function del(){
     console.log(currentValue)
     if (currentValue.length > 0) {
         new_str = currentValue.slice(0, -1);
-        setOutput_display_elem(new_str)
+        setOutput_display(new_str)
         popMem()
     }else{
         console.log("Nothing to remove")
@@ -85,8 +88,8 @@ function clearAll(){
     var currentValue = output_display_elem.value;
 
     if (currentValue.length > 0) {
-        setOutput_display_elem("")
-        setOutput_ans_elem("")
+        setOutput_display("")
+        setOutput_ans("")
         memory.operation = []
         memory.formula = []
         console.log(memory.operation)
@@ -96,11 +99,31 @@ function clearAll(){
     }
 }
 
-function setOutput_display_elem(value){
+function memoryOperation(value){
+    switch (value) {
+        case "plus":
+            
+            break;
+        case "minus":
+        
+            break;
+        case "store":
+        
+            break;
+        case "recall":
+        
+            break;
+
+        default:
+            break;
+    }
+}
+
+function setOutput_display(value){
     output_display_elem.value = value;
 }
 
-function setOutput_ans_elem(value){
+function setOutput_ans(value){
     output_ans_elem.innerHTML = value;
 }
 

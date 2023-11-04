@@ -25,10 +25,10 @@
                     <div class="top">
                         <div class="row">
                             <button type="mode" onclick="shift()" >Shift</button>
-                            <button type="memory" formula="" >M+</button>
-                            <button type="memory" formula="" >M-</button>
-                            <button type="memory" formula="" >MS</button>
-                            <button type="memory" formula="" >MR</button>
+                            <button type="memory" onclick="memoryOperation('plus')" >M+</button>
+                            <button type="memory" onclick="memoryOperation('minus')" >M-</button>
+                            <button type="memory" onclick="memoryOperation('store')" >MS</button>
+                            <button type="memory" onclick="memoryOperation('recall')" >MR</button>
                         </div>
                         <div class="row">
                             <button type="deri" formula="" >d/dx</button>
