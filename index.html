@@ -24,7 +24,7 @@
                 <div class="input">
                     <div class="top">
                         <div class="row">
-                            <button type="mode" formula=false onclick="shift()" >Shift</button>
+                            <button type="mode" onclick="shift()" >Shift</button>
                             <button type="memory" formula="" >M+</button>
                             <button type="memory" formula="" >M-</button>
                             <button type="memory" formula="" >MS</button>
@@ -52,10 +52,10 @@
                             <button type="logic" formula="" >OR</button>
                         </div>
                         <div class="row">
-                            <button type="func" formula="**" symbol="^(" >x</button>
-                            <button type="func" formula="" >√</button>
-                            <button type="" formula="" >(</button>
-                            <button type="" formula="" >)</button>
+                            <button type="operator" formula="**" symbol="^(" >x</button>
+                            <button type="func" formula="Math.sqrt" symbol="" >√</button>
+                            <button type="num" formula="(" symbol="(" >(</button>
+                            <button type="num" formula=")" symbol=")" >)</button>
                             <button type="" formula="" >NOT</button>
                         </div>
                     </div>
@@ -64,29 +64,29 @@
                             <button type="num" formula="7" symbol="7" >7</button>
                             <button type="num" formula="8" symbol="8" >8</button>
                             <button type="num" formula="9" symbol="9" >9</button>
-                            <button type="" formula="" class="warn">DEL</button>
-                            <button type="" formula="" class="warn">AC</button>
+                            <button class="warn" onclick="del()" >DEL</button>
+                            <button class="warn" onclick="clearAll()">AC</button>
                         </div>
                         <div class="row">
                             <button type="num" formula="4" symbol="4" >4</button>
                             <button type="num" formula="5" symbol="5" >5</button>
                             <button type="num" formula="6" symbol="6" >6</button>
-                            <button type="opeartor" formula="*" symbol="x" >x</button>
-                            <button type="opeartor" formula="/" symbol="÷" >÷</button>
+                            <button type="operator" formula="*" symbol="×" >×</button>
+                            <button type="operator" formula="/" symbol="÷" >÷</button>
                         </div>
                         <div class="row">
                             <button type="num" formula="1" symbol="1" >1</button>
                             <button type="num" formula="2" symbol="2" >2</button>
                             <button type="num" formula="3" symbol="3" >3</button>
-                            <button type="opeartor" formula="+" symbol="+" >+</button>
-                            <button type="opeartor" formula="-" symbol="-" >-</button>
+                            <button type="operator" formula="+" symbol="+" >+</button>
+                            <button type="operator" formula="-" symbol="-" >-</button>
                         </div>
                         <div class="row">
                             <button type="num" formula="0" symbol="0" >0</button>
                             <button type="num" formula="." symbol="." >.</button>
                             <button type="func" formula="Math.exp" symbol="E" >Exp</button>
                             <button type="num" formula="ans" symbol="Ans" >Ans</button>
-                            <button type="calculate" formula="=" symbol="=" >=</button>
+                            <button type="calculate" onclick="calculate()" >=</button>
                         </div>
                     </div>
                 </div>
