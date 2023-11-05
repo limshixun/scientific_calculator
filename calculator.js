@@ -1,12 +1,12 @@
 const input_button_elem = document.querySelector(".input")
-const output_display_elem =document.querySelector(".display")
-const output_ans_elem  =document.querySelector(".value")
+const output_display_elem = document.querySelector(".display")
+const output_ans_elem  = document.querySelector(".value")
 var ans = 0;
+var M = 0;
 
 memory ={
     operation: [],
     formula: [],
-    M: 0,
 }
 
 modes = [];
@@ -18,13 +18,22 @@ input_button_elem.addEventListener("click", event =>{
     const type = target.getAttribute('type')
 
     if (target.hasAttribute('type')){
-        if(type == "operator" || type == "num"){
-            console.log("type: num || operator")
+        if(getOutput_ans() != "" && type == "operator"){
+            clearAll()
+            updateDisplay('Ans','ans')
             updateDisplay(symbol,formula)
-        }else if(type == "func"){
-            console.log("type: func")
-        }else if(type == 'trigo'){
-
+        }else{
+            if(getOutput_ans() != "" && (type == "num" || type == "func" || type == "trigo") ) clearAll()
+            if(type == "operator" || type == "num"){
+                console.log("type: num || operator")
+                updateDisplay(symbol,formula)
+            }else if(type == "func"){
+                console.log("type: func")
+                updateDisplay(symbol,formula)
+            }else if(type == 'trigo'){
+                console.log("type: trigo")
+                updateDisplay(symbol,formula)
+            }
         }
     }else{
         console.log("not")
@@ -50,23 +59,40 @@ function calculate(){
     if(memory.formula != []){
         const str = memory.formula.join("")
         console.log("formula: ", str)
-        result =  eval(str);
+        try {
+            result =  eval(str);
+        } catch (error) {
+            if (error instanceof SyntaxError) {
+                // Handle syntax error
+                alert('Syntax Error')
+                console.error('Syntax Error:', error.message);
+            } else {
+                // Handle other types of errors
+                console.error('An error occurred:', error);
+            }
+        }
         setAns(result);
         updateResult(result);
     }else (console.log("Nothing to calculate"))
 }
 
+// Define a regular expression pattern to match function/operator strings
+// / /g sin\( represent sin( separated by |
+var pattern = /(ln\(|log\(|sin\(|cos\(|tan\(|asin\(|acos\(|atan\(|sqrt\(|log\(|exp\(|\^|\+|\-|\*|\/|\(|\)|\√\(|[1-9])/g;
+
 function del(){
-    //var output_display_elem = document.querySelector('.display');
     var currentValue = getOutput_display();
 
-    console.log(currentValue)
-    if (currentValue.length > 0) {
-        new_str = currentValue.slice(0, -1);
-        setOutput_display(new_str)
-        popMem()
-    }else{
-        console.log("Nothing to remove")
+    // Use a regular expression to find matches in the currentValue
+    var matches = currentValue.match(pattern);
+
+    if (matches && matches.length > 0) {
+        // If there are matches, remove the last match from the currentValue
+        var new_str = currentValue.slice(0, currentValue.lastIndexOf(matches[matches.length - 1]));
+        setOutput_display(new_str);
+        popMem();
+    } else {
+        console.log("Nothing to remove");
     }
 }
 
@@ -102,18 +128,16 @@ function clearAll(){
 function memoryOperation(value){
     switch (value) {
         case "plus":
-            
+            calculate();
+            setM(getM() + parseInt(getOutput_ans()))
             break;
         case "minus":
-        
+            calculate();
+            setM(getM() - getOutput_ans())
             break;
-        case "store":
-        
+        case "clear":
+            setM(0)
             break;
-        case "recall":
-        
-            break;
-
         default:
             break;
     }
@@ -141,4 +165,39 @@ function setAns(value){
 
 function getAns(){
     return ans
+}
+
+function getM(){
+    return M;
+}
+
+function setM(value){
+    M = value;
+}
+
+// from https://stackoverflow.com/questions/6399777/looking-for-derivative-script
+
+function derivation (f, x, dx) {
+    dx = dx || .00000009;
+    return (f(x+dx) - f(x)) / dx;
+}
+
+
+function numberSystem(type){
+    switch (type) {
+        case "bin":
+            
+            break;
+        case "hex":
+        
+            break;
+        case "oct":
+        
+            break;
+        case "dec":
+        
+            break;
+        default:
+            break;
+    }
 }

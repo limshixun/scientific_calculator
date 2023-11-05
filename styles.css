@@ -12,6 +12,7 @@ html{
 
 .calculator{
     display: flex; 
+    flex-direction: column;
     justify-content: center; 
     align-items: center;
 
@@ -21,7 +22,7 @@ html{
     transform: translate(-50%, -50%);
 
     width: 625px;
-    height: 850px;
+    height: 925px;
 
     background-color: #1d1c29;
     border-radius: 20px;
@@ -32,7 +33,7 @@ html{
     background-color: #1d1c29;
 
     width: 600px;
-    height: auto;
+    height: 850px;
 
     border-radius: 2.5%;
 }
