@@ -1,9 +1,15 @@
+// Define all the constants and variables
+// Select the input HTML element that contains all the button
 const input_button_elem = document.querySelector(".input")
+// Select the display HTML element to alter the innerHTML 
 const output_display_elem = document.querySelector(".display")
+// Select the value HTML element to alter the innerHTML 
 const output_ans_elem  = document.querySelector(".value")
+// To store the previously calculated value
 var ans = 0;
+// To store Memory value
 var M = 0;
-
+// 
 memory ={
     operation: [],
     formula: [],
@@ -18,22 +24,25 @@ input_button_elem.addEventListener("click", event =>{
     const type = target.getAttribute('type')
 
     if (target.hasAttribute('type')){
+        /*
+        When the user press an operator immediately after calculating a value (eg. after performing 9+9 and click the = button to get a result of 18,
+        the calculator allow the user to continue the calculation by performing the operation on the Ans (previously calculated value) )
+        If press + right after pressing = button, the display will become Ans + 
+        */
         if(getOutput_ans() != "" && type == "operator"){
             clearAll()
             updateDisplay('Ans','ans')
             updateDisplay(symbol,formula)
         }else{
+            /*
+            This condition allow the user to enter new operation right after a calculation wihtou clicking on the AC button
+            (eg. after performing 9+9 and click the = button to get a result of 18, user can press on a function like sin(
+            or a number like 9 and the calculator will clear automatically without pressing the AC button 
+            */
             if(getOutput_ans() != "" && (type == "num" || type == "func" || type == "trigo") ) clearAll()
-            if(type == "operator" || type == "num"){
-                console.log("type: num || operator")
-                updateDisplay(symbol,formula)
-            }else if(type == "func"){
-                console.log("type: func")
-                updateDisplay(symbol,formula)
-            }else if(type == 'trigo'){
-                console.log("type: trigo")
-                updateDisplay(symbol,formula)
-            }
+            // This condition allow all the button with a symbol attribute to be added on the display
+            // The only button with symbols are numbers, functions, operators and trigofunction
+            if(target.hasAttribute("symbol")) updateDisplay(symbol,formula)
         }
     }else{
         console.log("not")
@@ -184,20 +193,49 @@ function derivation (f, x, dx) {
 
 
 function numberSystem(type){
-    switch (type) {
-        case "bin":
-            
-            break;
-        case "hex":
-        
-            break;
-        case "oct":
-        
-            break;
-        case "dec":
-        
-            break;
-        default:
-            break;
+    const noCalculatedValue = getOutput_ans() == ""
+    if(noCalculatedValue){
+        console.log("nothing to change")
+    }else{
+
     }
+}
+
+function power(){
+    return '**';
+}
+
+function dec2bin(value){
+
+}
+
+function dec2hex(value){
+    // Define all the possible char for hexadecimal 
+    const hexChars = "0123456789ABCDEF";
+      
+    // Define variables for the result
+    var result = "";
+    
+    // Convert decimal into hexadecimal
+    while (parseInt(value) > 0) {
+        var remainder = num % 16;
+        result = hexChars[remainder] + result;
+        num = Math.floor(num / 16);
+    }
+}
+
+function dec2oct(value){
+
+}
+
+function bin2dec(value){
+
+}
+
+function hex2dec(value){
+
+}
+
+function oct2dec(value){
+
 }
