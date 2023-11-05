@@ -32,7 +32,7 @@ input_button_elem.addEventListener("click", event =>{
 })
 
 function updateDisplay(symbol, formula){
-    const currentValue = output_display_elem.value || '';
+    const currentValue = getOutput_display() || '';
     setOutput_display(currentValue + symbol);
 
     // allow the display to follow the content
@@ -58,7 +58,7 @@ function calculate(){
 
 function del(){
     //var output_display_elem = document.querySelector('.display');
-    var currentValue = output_display_elem.value;
+    var currentValue = getOutput_display();
 
     console.log(currentValue)
     if (currentValue.length > 0) {
@@ -85,7 +85,7 @@ function popMem(){
 }
 
 function clearAll(){
-    var currentValue = output_display_elem.value;
+    var currentValue = getOutput_display();
 
     if (currentValue.length > 0) {
         setOutput_display("")
@@ -120,13 +120,25 @@ function memoryOperation(value){
 }
 
 function setOutput_display(value){
-    output_display_elem.value = value;
+    output_display_elem.innerHTML = value;
+}
+
+function getOutput_display(){
+    return output_display_elem.innerHTML
 }
 
 function setOutput_ans(value){
     output_ans_elem.innerHTML = value;
 }
 
+function getOutput_ans(){
+    return output_ans_elem.innerHTML
+}
+
 function setAns(value){
     ans = value;
+}
+
+function getAns(){
+    return ans
 }
