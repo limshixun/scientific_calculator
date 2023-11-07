@@ -42,7 +42,7 @@ html{
     margin: 0 auto;
     
     background-color: #b6c4b5;
-    border-radius: 20px;
+    border-radius: 10px;
     width: 97%;
 }  
 
@@ -164,11 +164,17 @@ html{
     background-color: #3a1512;
 }
 
-.mode{
+.modes{
     height: 20px;
     background-color: transparent;
     margin: 5px;
+    padding-left: 10px;
+    color: rgb(190, 148, 70);
+    display:flex
+}
 
+.modes h2{
+    padding-right: 30px;
 }
 
 .scrollable{
@@ -187,5 +193,4 @@ html{
     overflow-x: auto; 
     font-size: larger;
     font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    
 }

@@ -5,6 +5,8 @@ const input_button_elem = document.querySelector(".input")
 const output_display_elem = document.querySelector(".display")
 // Select the value HTML element to alter the innerHTML 
 const output_ans_elem  = document.querySelector(".value")
+//
+const num_sys_mode_elem = document.querySelector(".num_sys_mode")
 // To store the previously calculated value
 var ans = 0;
 // To store Memory value
@@ -15,6 +17,7 @@ memory ={
     formula: [],
 }
 
+
 modes = [];
 
 input_button_elem.addEventListener("click", event =>{
@@ -22,6 +25,15 @@ input_button_elem.addEventListener("click", event =>{
     const symbol = target.getAttribute('symbol')
     const formula = target.getAttribute('formula');
     const type = target.getAttribute('type')
+
+    // conditions for paranthess multiplication
+    // First get the previous inserted formula 
+    const previous_formula = memory.formula[memory.formula.length -1];
+    const multiply_before_parenthesis = Number.isInteger(parseInt(previous_formula)) && formula=="(";
+    const multiply_after_parenthesis = previous_formula == ")" && Number.isInteger(parseInt(formula));
+    const multiply_between_parenthesis = previous_formula == ")" && formula=="(";
+    const multiply_before_trigo = Number.isInteger(parseInt(previous_formula)) && type=="trigo";
+    const multiplication_conditions = multiply_before_trigo || multiply_before_parenthesis || multiply_after_parenthesis || multiply_between_parenthesis
 
     if (target.hasAttribute('type')){
         /*
@@ -33,6 +45,10 @@ input_button_elem.addEventListener("click", event =>{
             clearAll()
             updateDisplay('Ans','ans')
             updateDisplay(symbol,formula)
+        }else if (multiplication_conditions){
+            new_symbol = symbol;
+            new_formula = "*" + formula
+            updateDisplay(new_symbol,new_formula)
         }else{
             /*
             This condition allow the user to enter new operation right after a calculation wihtou clicking on the AC button
@@ -66,18 +82,20 @@ function updateResult(value){
 
 function calculate(){
     if(memory.formula != []){
+        //var result = ""
         const str = memory.formula.join("")
         console.log("formula: ", str)
         try {
-            result =  eval(str);
+            //result =  eval(str);
+            result = Function("return " + str)();
         } catch (error) {
             if (error instanceof SyntaxError) {
                 // Handle syntax error
-                alert('Syntax Error')
-                console.error('Syntax Error:', error.message);
+                alert('Syntax Error:' + error.message)
+                console.error('Syntax Error: ', error.message);
             } else {
                 // Handle other types of errors
-                console.error('An error occurred:', error);
+                console.error('An error occurred: '+ error);
             }
         }
         setAns(result);
@@ -197,16 +215,72 @@ function numberSystem(type){
     if(noCalculatedValue){
         console.log("nothing to change")
     }else{
+        currentNumber_System = getNum_sys_mode();
+        const value = getOutput_ans();
+        console.log("value" , value)
+        var dec_num = 0;
 
+        /*Convert everything to decimal first*/
+        switch (currentNumber_System) {
+            case "hex":
+                dec_num = hex2dec(value)
+                break;
+            case "oct":
+                dec_num = oct2dec(value)
+                break;
+            case "bin":
+                dec_num = bin2dec(value)
+                break;
+            case "dec":
+                dec_num = value;
+                break;
+        }
+        console.log("dec_num" ,dec_num)
+        switch (type) {
+            case "hex":
+                hex_num = dec2hex(dec_num)
+                console.log(hex_num)
+                setNum_sys_mode("hex")
+                setOutput_ans(hex_num)
+                console.log(typeof hex_num)
+                break;
+            case "oct":
+                oct_num = dec2oct(dec_num)
+                setNum_sys_mode("oct")
+                setOutput_ans(oct_num)
+                console.log(oct_num)
+                console.log(typeof oct_num)
+                break;
+            case "bin":
+                bin_num = dec2bin(dec_num)
+                setNum_sys_mode("bin")
+                setOutput_ans(bin_num)
+                console.log(bin_num)
+                break;
+            case "dec":
+                setNum_sys_mode("dec")
+                setOutput_ans(dec_num)
+                console.log(dec_num)
+                break;
+        }
+        
     }
 }
 
-function power(){
-    return '**';
-}
-
 function dec2bin(value){
-
+    // Define all the possible char for binary 
+    const binChars = "01";
+      
+    // Define variables for the result
+    var result = "";
+    
+    // Convert decimal into binary
+    while (parseInt(value) > 0) {
+        var remainder = value % 2;
+        result = binChars[remainder] + result;
+        value = Math.floor(value / 2);
+    }
+    return result;
 }
 
 function dec2hex(value){
@@ -218,24 +292,45 @@ function dec2hex(value){
     
     // Convert decimal into hexadecimal
     while (parseInt(value) > 0) {
-        var remainder = num % 16;
+        var remainder = value % 16;
         result = hexChars[remainder] + result;
-        num = Math.floor(num / 16);
+        value = Math.floor(value / 16);
     }
+    return result;
 }
 
 function dec2oct(value){
-
+    // Define all the possible char for octal
+    const octChars = "01234567";
+      
+    // Define variables for the result
+    var result = "";
+    
+    // Convert decimal into octal
+    while (parseInt(value) > 0) {
+        var remainder = value % 8;
+        result = octChars[remainder] + result;
+        value = Math.floor(value / 8);
+    }
+    return result;
 }
 
 function bin2dec(value){
-
+    return parseInt(value,2)
 }
 
 function hex2dec(value){
-
+    return parseInt(value,16)
 }
 
 function oct2dec(value){
+    return parseInt(value,8)
+}
 
+function getNum_sys_mode(){
+    return num_sys_mode_elem.innerHTML;
+}
+
+function setNum_sys_mode(value){
+    num_sys_mode_elem.innerHTML = value;
 }
