@@ -6,7 +6,11 @@ const output_display_elem = document.querySelector(".display")
 // Select the value HTML element to alter the innerHTML 
 const output_ans_elem  = document.querySelector(".value")
 //
+const all_trigo_button = document.querySelectorAll("button[type='trigo']")
+//
 const num_sys_mode_elem = document.querySelector(".num_sys_mode")
+
+
 // To store the previously calculated value
 var ans = 0;
 // To store Memory value
@@ -17,6 +21,7 @@ memory ={
     formula: [],
 }
 
+var hyp = false;
 
 modes = [];
 
@@ -105,7 +110,7 @@ function calculate(){
 
 // Define a regular expression pattern to match function/operator strings
 // / /g sin\( represent sin( separated by |
-var pattern = /(ln\(|log\(|sin\(|cos\(|tan\(|asin\(|acos\(|atan\(|sqrt\(|log\(|exp\(|\^|\+|\-|\*|\/|\(|\)|\√\(|[1-9])/g;
+var pattern = /(OR|AND|NOT\(|ln\(|log\(|sin\(|cos\(|tan\(|asin\(|acos\(|atan\(|sinh\(|cosh\(|tanh\(|asinh\(|acosh\(|atanh\(|sqrt\(|log\(|exp\(|x|\^|\+|\-|\*|\/|\(|\)|\√\(|[1-9])/g;
 
 function del(){
     var currentValue = getOutput_display();
@@ -147,6 +152,8 @@ function clearAll(){
         memory.formula = []
         console.log(memory.operation)
         console.log(memory.formula)
+        setNum_sys_mode("dec")
+        setHyp(false)
     }else{
         console.log("Nothing to remove")
     }
@@ -163,7 +170,8 @@ function memoryOperation(value){
             setM(getM() - getOutput_ans())
             break;
         case "clear":
-            setM(0)
+            setM(0);
+            clearAll();
             break;
         default:
             break;
@@ -209,6 +217,54 @@ function derivation (f, x, dx) {
     return (f(x+dx) - f(x)) / dx;
 }
 
+
+function hyperbolic() {
+    setHyp(!getHyp());
+    const new_hyp = getHyp();
+    const length = all_trigo_button.length;
+    if(new_hyp == true){
+        console.log(true)
+        for (let index = 0; index < length; index++) {
+            const element = all_trigo_button[index];
+            formula = element.getAttribute("formula");
+            symbol = element.getAttribute("symbol");
+            
+            inner = element.innerHTML;
+            console.log(typeof formula)
+            
+            formula_length = formula.length 
+            symbol_length = symbol.length
+            new_formula = formula.slice(0,formula_length-1) + "h("
+            new_symbol = symbol.slice(0,symbol_length-1) + "h("
+            new_inner = inner + "h"
+
+            element.setAttribute("formula", new_formula)
+            element.setAttribute("symbol",new_symbol)
+            element.innerHTML = new_inner
+        }
+    }else if(new_hyp == false){
+        console.log(false)
+        for (let index = 0; index < length; index++) {
+            const element = all_trigo_button[index];
+            formula = element.getAttribute("formula");
+            symbol = element.getAttribute("symbol");
+            
+            inner = element.innerHTML;
+            console.log(typeof formula)
+            
+            formula_length = formula.length 
+            symbol_length = symbol.length
+
+            new_formula = formula.slice(0,formula_length-2) + "("
+            new_symbol = symbol.slice(0,symbol_length-2) + "("
+            new_inner = inner.slice(0,inner.length-1)
+
+            element.setAttribute("formula", new_formula)
+            element.setAttribute("symbol",new_symbol)
+            element.innerHTML = new_inner
+        }
+    }
+}
 
 function numberSystem(type){
     const noCalculatedValue = getOutput_ans() == ""
@@ -263,9 +319,9 @@ function numberSystem(type){
                 console.log(dec_num)
                 break;
         }
-        
     }
 }
+
 
 function dec2bin(value){
     // Define all the possible char for binary 
@@ -333,4 +389,12 @@ function getNum_sys_mode(){
 
 function setNum_sys_mode(value){
     num_sys_mode_elem.innerHTML = value;
+}
+
+function getHyp(){
+    return hyp;
+}
+
+function setHyp(value){
+    hyp = value;
 }
