@@ -20,13 +20,13 @@
                 </div>  
                 <div class="modes">
                     <h2 class="num_sys_mode">dec</h2>
-                    <h2 class="hyperbolic">hyp</h2>
-                    <h2 class="shift" >shift</h2>
+                    <h2 id="hyp" style="display: none;">hyp</h2>
+                    <h2 id="deri_mode" style="display: none;" >d/dx</h2>
                 </div>
                 <div class="input">
                     <div class="top">
                         <div class="row">
-                            <button type="mode" onclick="shift()" >Shift</button>
+                            <button type="num" formula="x"  symbol="x" >x</button>
                             <button type="memory" onclick="memoryOperation('plus')" >M+</button>
                             <button type="memory" onclick="memoryOperation('minus')" >M-</button>
                             <button type="memory" onclick="memoryOperation('clear')" >MC</button>
@@ -40,7 +40,7 @@
                             <button type="logic" formula="!(" symbol="NOT(" >NOT</button>
                         </div>
                         <div class="row">
-                            <button type="deri" formula="" >d/dx</button>
+                            <button type="deri" onclick="derivation()" >d/dx</button>
                             <button type="num_sys" onclick="numberSystem('bin')" >bin</button>
                             <button type="num_sys" onclick="numberSystem('hex')" >hex</button>
                             <button type="num_sys" onclick="numberSystem('oct')" >oct</button>
