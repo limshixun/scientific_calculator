@@ -34,23 +34,6 @@ input_button_elem.addEventListener("click", event =>{
     const formula = target.getAttribute('formula');
     const type = target.getAttribute('type')
 
-    // due to the way how parenthesis can be used as multiplication tools in most scientific calculators, 
-    // we have to define conditions to allow parenthesis multiplication to happen
-    // First step is to get the previously inserted formula
-    const previous_formula = memory.formula[memory.formula.length -1];
-    // Multiplication can happen in 3 differetn conditions, x(x), (x)(x), and (x)x
-    const multiply_before_parenthesis = Number.isInteger(parseInt(previous_formula)) && formula=="(";
-    const multiply_after_parenthesis = previous_formula == ")" && Number.isInteger(parseInt(formula));
-    const multiply_between_parenthesis = previous_formula == ")" && formula=="(";
-    // Normal scientific calculator also allow something like xsin(x)
-    const multiply_before_trigo = Number.isInteger(parseInt(previous_formula)) && type=="trigo";
-    const multiply_before_x = Number.isInteger(parseInt(previous_formula)) && formula=="x";
-    // 10
-    const multiply_before_func = Number.isInteger(parseInt(previous_formula)) && type=="func";
-    // Combine all the condition for ease of use
-    const multiplication_conditions = multiply_before_trigo || multiply_before_parenthesis || multiply_after_parenthesis || multiply_between_parenthesis || multiply_before_x || multiply_before_func
-    
-
     // Since the target is actually the parent of these button which is div with class=input, we need to check if the user is clicking a button. All button will have attribute type
     // If this condition is not included, the rest of the function will be executed even when user is clicking in between the buttons
     if (target.hasAttribute('type')){
@@ -59,24 +42,46 @@ input_button_elem.addEventListener("click", event =>{
         the calculator allow the user to continue the calculation by performing the operation on the Ans (previously calculated value) )
         If press + right after pressing = button, the display will become Ans + 
         */
-        if(getOutput_ans() != "" && type == "operator"){
+        if(getOutput_ans() != "" && type == "operator" ){
             clearAll()
             updateDisplay('Ans','ans')
             updateDisplay(symbol,formula)
-        }else if (multiplication_conditions){
-            new_symbol = symbol;
-            new_formula = "*" + formula
-            updateDisplay(new_symbol,new_formula)
         }else{
+            console.log(type)
             /*
             This condition allow the user to enter new operation right after a calculation wihtou clicking on the AC button
             (eg. after performing 9+9 and click the = button to get a result of 18, user can press on a function like sin(
             or a number like 9 and the calculator will clear automatically without pressing the AC button 
             */
-            if(getOutput_ans() != "" && (type == "num" || type == "func" || type == "trigo") ) clearAll()
+            if (getOutput_ans() !== "" && (type == "num" || type == "func" || type == "trigo")) {
+                clearAll();
+            }
             // This condition allow all the button with a symbol attribute to be added on the display
             // The only button with symbols are numbers, functions, operators and trigofunction
-            if(target.hasAttribute("symbol")) updateDisplay(symbol,formula)
+            // due to the way how parenthesis can be used as multiplication tools in most scientific calculators, 
+            // we have to define conditions to allow parenthesis multiplication to happen
+            // First step is to get the previously inserted formula
+            const previous_formula = memory.formula[memory.formula.length -1];
+            // Multiplication can happen in 3 differetn conditions, x(x), (x)(x), and (x)x
+            const multiply_before_parenthesis = Number.isInteger(parseInt(previous_formula)) && formula=="(";
+            const multiply_after_parenthesis = previous_formula == ")" && Number.isInteger(parseInt(formula));
+            const multiply_between_parenthesis = previous_formula == ")" && formula=="(";
+            // Normal scientific calculator also allow something like xsin(x)
+            const multiply_before_trigo = Number.isInteger(parseInt(previous_formula)) && type=="trigo";
+            const multiply_before_x = Number.isInteger(parseInt(previous_formula)) && formula=="x";
+            // 10
+            const multiply_before_func = Number.isInteger(parseInt(previous_formula)) && type=="func";
+            // Combine all the condition for ease of use
+            const multiplication_conditions = multiply_before_trigo || multiply_before_parenthesis || multiply_after_parenthesis || multiply_between_parenthesis || multiply_before_x || multiply_before_func
+            if(target.hasAttribute("symbol")){
+                if (multiplication_conditions){
+                    new_symbol = symbol;
+                    new_formula = "*" + formula
+                    updateDisplay(new_symbol,new_formula)
+                }else{
+                    updateDisplay(symbol,formula)
+                }
+            } 
         }
     }else{
         console.log("not")
@@ -114,34 +119,35 @@ function updateResult(value){
     console.log("updateResult:", output_ans_elem.innerHTML)
     setAns(value);
 }
-
+// memory.formula != []
 // Performing calculations by evaluating the formula inputed by the user in the memory
-function calculate(){
-    if(memory.formula != []){
-        //var result = ""
-        const str = memory.formula.join("")
-        console.log("formula: ", str)
+function calculate() {
+    if (memory.formula.length !== 0) {
+        const str = memory.formula.join("");
+        console.log("formula: ", str);
+
         try {
-            //result =  eval(str);
-            result = Function("return " + str)();
+            let result = Function("return " + str)();
+            console.log("BigInt : " + result);
+
+            if (deri) {
+                console.log(result);
+                result = calcDeri(deriExpression, result);
+            }
+
+            setAns(result);
+            updateResult(result);
         } catch (error) {
             if (error instanceof SyntaxError) {
-                // Handle syntax error
-                alert('Syntax Error:' + error.message)
-                console.error('Syntax Error: ', error.message);
+                alert('Syntax Error: ' + error.message);
             } else {
-                // Handle other types of errors
-                console.error('An error occurred: '+ error);
+                console.error('An error occurred: ' + error);
             }
+            clearAll();
         }
-        // If currently in derivation mode, the result will be the derivation of a function pre inserted by user and the value of x
-        if (deri) {
-            console.log(result)
-            result = calcDeri(deriExpression,result);
-        }
-        setAns(result);
-        updateResult(result);
-    }else (console.log("Nothing to calculate"))
+    } else {
+        console.log("Nothing to calculate");
+    }
 }
 /*
  * User Manual:
@@ -158,7 +164,7 @@ Anything that wanted to be deleted needs to be added into the pattern
 Define a regular expression pattern to match function/operator strings
 / /g sin\( represent sin( separated by |
 */
-const pattern = /(true|false|e|x|OR|AND|NOT\(|ln\(|log\(|sin\(|cos\(|tan\(|asin\(|acos\(|atan\(|sinh\(|cosh\(|tanh\(|asinh\(|acosh\(|atanh\(|sqrt\(|log\(|exp\(|x|\.|\^|\+|\-|\*|\/|\(|\)|\√\(|[1-9])/g;
+const pattern = /(Ans|true|false|M|e|E|x|OR|AND|NOT\(|ln\(|log\(|sin\(|cos\(|tan\(|asin\(|acos\(|atan\(|sinh\(|cosh\(|tanh\(|asinh\(|acosh\(|atanh\(|sqrt\(|log\(|exp\(|÷|×|\.|\^|\+|\-|\*|\/|\(|\)|\√\(|[0-9])/g;
 
 // This function Remove a pre-defined pattern from the display and memory of the calculator 
 function del(){
@@ -466,7 +472,7 @@ function memoryOperation(value){
 }
 
 function setOutput_display(value){
-    output_display_elem.innerHTML = value;
+    output_display_elem.innerHTML = value.toString();
 }
 
 function getOutput_display(){
