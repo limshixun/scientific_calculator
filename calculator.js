@@ -452,15 +452,29 @@ function clearAll(){
     }
 }
 
-function memoryOperation(value){
+function memoryOperation(value) {
+    const str = memory.formula.join("");
+    let result;
+    try {
+        result = Function("return " + str)();
+    } catch (error) {
+        if (error instanceof SyntaxError) {
+            alert('Syntax Error: ' + error.message);
+        } else {
+            console.error('An error occurred: ' + error);
+        }
+        clearAll();
+        return;
+    }
+
     switch (value) {
         case "plus":
-            calculate();
-            setM(getM() + parseFloat(getOutput_ans().toString()))
+            setM(getM() + result);
+            updateResult("M → " + getM());
             break;
         case "minus":
-            calculate();
-            setM(getM() - getOutput_ans())
+            setM(getM() - result);
+            updateResult("M → " + getM());
             break;
         case "clear":
             setM(0);
