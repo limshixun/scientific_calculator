@@ -44,8 +44,12 @@ input_button_elem.addEventListener("click", event =>{
     const multiply_between_parenthesis = previous_formula == ")" && formula=="(";
     // Normal scientific calculator also allow something like xsin(x)
     const multiply_before_trigo = Number.isInteger(parseInt(previous_formula)) && type=="trigo";
+    const multiply_before_x = Number.isInteger(parseInt(previous_formula)) && formula=="x";
+    // 10
+    const multiply_before_func = Number.isInteger(parseInt(previous_formula)) && type=="func";
     // Combine all the condition for ease of use
-    const multiplication_conditions = multiply_before_trigo || multiply_before_parenthesis || multiply_after_parenthesis || multiply_between_parenthesis
+    const multiplication_conditions = multiply_before_trigo || multiply_before_parenthesis || multiply_after_parenthesis || multiply_between_parenthesis || multiply_before_x || multiply_before_func
+    
 
     // Since the target is actually the parent of these button which is div with class=input, we need to check if the user is clicking a button. All button will have attribute type
     // If this condition is not included, the rest of the function will be executed even when user is clicking in between the buttons
@@ -132,7 +136,8 @@ function calculate(){
         }
         // If currently in derivation mode, the result will be the derivation of a function pre inserted by user and the value of x
         if (deri) {
-            result = slope(createFunction(deriExpression),result);
+            console.log(result)
+            result = calcDeri(deriExpression,result);
         }
         setAns(result);
         updateResult(result);
@@ -153,7 +158,7 @@ Anything that wanted to be deleted needs to be added into the pattern
 Define a regular expression pattern to match function/operator strings
 / /g sin\( represent sin( separated by |
 */
-const pattern = /(true|false|e|x|OR|AND|NOT\(|ln\(|log\(|sin\(|cos\(|tan\(|asin\(|acos\(|atan\(|sinh\(|cosh\(|tanh\(|asinh\(|acosh\(|atanh\(|sqrt\(|log\(|exp\(|x|\^|\+|\-|\*|\/|\(|\)|\√\(|[1-9])/g;
+const pattern = /(true|false|e|x|OR|AND|NOT\(|ln\(|log\(|sin\(|cos\(|tan\(|asin\(|acos\(|atan\(|sinh\(|cosh\(|tanh\(|asinh\(|acosh\(|atanh\(|sqrt\(|log\(|exp\(|x|\.|\^|\+|\-|\*|\/|\(|\)|\√\(|[1-9])/g;
 
 // This function Remove a pre-defined pattern from the display and memory of the calculator 
 function del(){
@@ -178,114 +183,13 @@ function del(){
  * 3. View the pattern in the display column being deleted.
  */
 
-// Push the symbol and formula of a button into the memory
-// Invoked when updating display
-function pushMem(symbol, formula){
-    memory.operation.push(symbol)
-    memory.formula.push(formula)
-    console.log(memory.operation)
-    console.log(memory.formula)
-}
-
-// Pop the last symbol and formula in the memory
-// Invoked when using del() function
-function popMem(){
-    memory.operation.pop()
-    memory.formula.pop()
-    console.log(memory.operation)
-    console.log(memory.formula)
-}
-
-function clearAll(){
-    var currentValue = getOutput_display();
-
-    if (currentValue.length > 0) {
-        setOutput_display("")
-        setOutput_ans("")
-        memory.operation = []
-        memory.formula = []
-        console.log(memory.operation)
-        console.log(memory.formula)
-        setNum_sys_mode("dec")
-    }else{
-        console.log("Nothing to remove")
-    }
-
-    if(hyp){
-        setHyp(false)
-    }
-    if(deri){
-        setDeri(false)
-    }
-}
-
-function memoryOperation(value){
-    switch (value) {
-        case "plus":
-            calculate();
-            setM(getM() + parseInt(getOutput_ans()))
-            break;
-        case "minus":
-            calculate();
-            setM(getM() - getOutput_ans())
-            break;
-        case "clear":
-            setM(0);
-            clearAll();
-            break;
-        default:
-            break;
-    }
-}
-
-function setOutput_display(value){
-    output_display_elem.innerHTML = value;
-}
-
-function getOutput_display(){
-    return output_display_elem.innerHTML
-}
-
-function setOutput_ans(value){
-    output_ans_elem.innerHTML = value;
-}
-
-function getOutput_ans(){
-    return output_ans_elem.innerHTML
-}
-
-function setAns(value){
-    ans = value;
-}
-
-function getAns(){
-    return ans
-}
-
-function getM(){
-    return M;
-}
-
-function setM(value){
-    M = value;
-}
-
-// from https://stackoverflow.com/questions/6399777/looking-for-derivative-script
-
-function slope (f, x) {
-    dx = .00000009;
-    return (f(x+dx) - f(x)) / dx;
-}
-
-function createFunction(value) {
-    // Use the Function constructor to create a function dynamically
-    try {
-        const dynamicFunc = new Function('x', `return ${value};`);
-        return dynamicFunc;
-    } catch (error) {
-        console.error('Invalid expression, Unable to create function.');
-        return null;
-    }
+// Calculate derivation by using mathjs import
+function calcDeri(f, xValue) {
+    checkValidExpr(f)
+    f = f.replace(/\*\*/g, '^');
+    var derivative = math.derivative(f, 'x').toString();
+    const result = math.evaluate(derivative, { x: xValue });
+    return result;
 }
 
 // store to expression to use it after user input x=
@@ -294,6 +198,7 @@ var deriExpression = "";
 function derivation(){
     if(memory.formula != []){
         expression = memory.formula.join("");
+        checkValidExpr(expression)
         // store to expression to use it after user input x=
         setDeriExpression(expression)
         console.log(deriExpression)
@@ -498,4 +403,115 @@ function setDeri(value){
     }else{
         deri_mode_elem.style.display = 'none';
     }
+}
+
+// Push the symbol and formula of a button into the memory
+// Invoked when updating display
+function pushMem(symbol, formula){
+    memory.operation.push(symbol)
+    memory.formula.push(formula)
+    console.log(memory.operation)
+    console.log(memory.formula)
+}
+
+// Pop the last symbol and formula in the memory
+// Invoked when using del() function
+function popMem(){
+    memory.operation.pop()
+    memory.formula.pop()
+    console.log(memory.operation)
+    console.log(memory.formula)
+}
+
+function clearAll(){
+    var currentValue = getOutput_display();
+
+    if (currentValue.length > 0) {
+        setOutput_display("")
+        setOutput_ans("")
+        memory.operation = []
+        memory.formula = []
+        console.log(memory.operation)
+        console.log(memory.formula)
+        setNum_sys_mode("dec")
+    }else{
+        console.log("Nothing to remove")
+    }
+
+    if(hyp){
+        setHyp(false)
+    }
+    if(deri){
+        setDeri(false)
+    }
+}
+
+function memoryOperation(value){
+    switch (value) {
+        case "plus":
+            calculate();
+            setM(getM() + parseFloat(getOutput_ans().toString()))
+            break;
+        case "minus":
+            calculate();
+            setM(getM() - getOutput_ans())
+            break;
+        case "clear":
+            setM(0);
+            clearAll();
+            break;
+        default:
+            break;
+    }
+}
+
+function setOutput_display(value){
+    output_display_elem.innerHTML = value;
+}
+
+function getOutput_display(){
+    return output_display_elem.innerHTML
+}
+
+function setOutput_ans(value){
+    output_ans_elem.innerHTML = value;
+}
+
+function getOutput_ans(){
+    return output_ans_elem.innerHTML
+}
+
+function setAns(value){
+    ans = value;
+}
+
+function getAns(){
+    return ans
+}
+
+function getM(){
+    return M;
+}
+
+function setM(value){
+    M = value;
+}
+
+function checkValidExpr(str) {
+    var valid = true;
+    try {
+        // Use Function constructor to create a function with 'x' as an argument
+        const check = new Function('x', 'return ' + str);
+
+    } catch (error) {
+        clearAll();
+        valid = false;
+        if (error instanceof SyntaxError) {
+            alert('Syntax Error: ' + error.message);
+            console.error('Syntax Error: ', error.message);
+        } else {
+            console.error('An error occurred: ' + error);
+        }
+    }
+    return valid;
 }

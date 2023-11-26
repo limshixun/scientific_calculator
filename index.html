@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="UTF-8">
         <title>Scientific Calculator</title>
-        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="./styles.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.4.4/math.js"></script>    
     </head>
     <body>
         <div class="calculator">
@@ -61,11 +63,11 @@
                             <button type="func" formula="Math.log(Math.E," symbol="ln(" >ln</button>
                         </div>
                         <div class="row">
-                            <button type="operator" formula="**" symbol="^" >x²</button>
+                            <button type="operator" formula="**2" symbol="^2" >x²</button>
+                            <button type="operator" formula="**" symbol="^" >^</button>
                             <button type="func" formula="Math.sqrt(" symbol="√(" >√</button>
                             <button type="num" formula="(" symbol="(" >(</button>
                             <button type="num" formula=")" symbol=")" >)</button>
-                            <button type=""  >MR</button>
                         </div>
                     </div>
                     <div class="btm">
@@ -101,6 +103,6 @@
                 </div>
             </div>
         </div>
-        <script src="calculator.js"></script>
+        <script src="./calculator.js"></script>
     </body>
 </html>
