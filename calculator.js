@@ -7,6 +7,7 @@ const output_display_elem = document.querySelector(".display")
 const output_ans_elem  = document.querySelector(".value")
 // Select all the buttons with type trigo 
 const all_trigo_button = document.querySelectorAll("button[type='trigo']")
+const all_num_button = document.querySelectorAll("button[type='num']")
 // Select all the elements under number system mode which are dec oct hex and bin
 const num_sys_mode_elem = document.querySelector(".num_sys_mode")
 const deri_mode_elem = document.getElementById("deri_mode");
@@ -26,6 +27,17 @@ memory ={
 var hyp = false;
 // Store the state of derivation, the calculator calculate value a bit differently under the deri mode on, see calculate() 
 var deri = false;
+
+function isNum(previous_formula){
+    for (let i = 0; i < all_num_button.length; i++) {
+        const button = all_num_button[i];
+        if(button.getAttribute('formula') === previous_formula.toString()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+}
 
 //an event listener to update the display and memory of operation and formula
 input_button_elem.addEventListener("click", event =>{
@@ -62,6 +74,7 @@ input_button_elem.addEventListener("click", event =>{
             // we have to define conditions to allow parenthesis multiplication to happen
             // First step is to get the previously inserted formula
             const previous_formula = memory.formula[memory.formula.length -1];
+            const isNum = false;
             // Multiplication can happen in 3 differetn conditions, x(x), (x)(x), and (x)x
             const multiply_before_parenthesis = Number.isInteger(parseInt(previous_formula)) && formula=="(";
             const multiply_after_parenthesis = previous_formula == ")" && Number.isInteger(parseInt(formula));
@@ -69,10 +82,12 @@ input_button_elem.addEventListener("click", event =>{
             // Normal scientific calculator also allow something like xsin(x)
             const multiply_before_trigo = Number.isInteger(parseInt(previous_formula)) && type=="trigo";
             const multiply_before_x = Number.isInteger(parseInt(previous_formula)) && formula=="x";
+            const multiply_before_e = Number.isInteger(parseInt(previous_formula)) && formula=="Math.E";
+            const multiply_after_e = previous_formula == "Math.E" && Number.isInteger(parseInt(formula));
             // 10
             const multiply_before_func = Number.isInteger(parseInt(previous_formula)) && type=="func";
             // Combine all the condition for ease of use
-            const multiplication_conditions = multiply_before_trigo || multiply_before_parenthesis || multiply_after_parenthesis || multiply_between_parenthesis || multiply_before_x || multiply_before_func
+            const multiplication_conditions = multiply_before_trigo || multiply_before_parenthesis || multiply_after_parenthesis || multiply_between_parenthesis || multiply_before_x || multiply_before_func || multiply_before_e || multiply_after_e
             if(target.hasAttribute("symbol")){
                 if (multiplication_conditions){
                     new_symbol = symbol;
@@ -164,7 +179,7 @@ Anything that wanted to be deleted needs to be added into the pattern
 Define a regular expression pattern to match function/operator strings
 / /g sin\( represent sin( separated by |
 */
-const pattern = /(Ans|true|false|M|e|E|x|OR|AND|NOT\(|ln\(|log\(|sin\(|cos\(|tan\(|asin\(|acos\(|atan\(|sinh\(|cosh\(|tanh\(|asinh\(|acosh\(|atanh\(|sqrt\(|log\(|exp\(|÷|×|\.|\^|\+|\-|\*|\/|\(|\)|\√\(|[0-9])/g;
+const pattern = /(Ans|true|false|M|e|E|x|OR|AND|NOT\(|ln\(|log\(|sin\(|cos\(|tan\(|asin\(|acos\(|atan\(|sinh\(|cosh\(|tanh\(|asinh\(|acosh\(|atanh\(|sqrt\(|log\(|exp\(|²|÷|×|\.|\^|\+|\-|\*|\/|\(|\)|\√\(|[0-9])/g;
 
 // This function Remove a pre-defined pattern from the display and memory of the calculator 
 function del(){
