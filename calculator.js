@@ -1,14 +1,19 @@
 // Select the input HTML element that contains all the button
 const input_button_elem = document.querySelector(".input")
+
 // Select the display HTML element to alter the innerHTML 
 const output_display_elem = document.querySelector(".display")
+
 // Select the value HTML element to alter the innerHTML 
 const output_ans_elem  = document.querySelector(".value")
+
 // Select all the buttons with type trigo 
 const all_trigo_button = document.querySelectorAll("button[type='trigo']")
 const all_num_button = document.querySelectorAll("button[type='num']")
+
 // Select all the elements under number system mode which are dec oct hex and bin
 const num_sys_mode_elem = document.querySelector(".num_sys_mode")
+
 const deri_mode_elem = document.getElementById("deri_mode");
 const hyp_elem = document.getElementById('hyp');
 
@@ -16,19 +21,20 @@ const hyp_elem = document.getElementById('hyp');
 var ans = 0;
 // To store Memory value
 var M = 0;
-// To store the input from user for calculation and display purposes
-// because the display and the actual formula itself might differ, thus it is necessary to seperate the operation and formula
-memory ={
-    operation: [],  
-    formula: [],
-}
 // Store the state of hyper
 var hyp = false;
 // Store the state of derivation, the calculator calculate value a bit differently under the deri mode on, see calculate() 
 var deri = false;
 
-// an event listener to update the display and memory of operation and formula
-// Event listener listen to clicks that occur in the input <div> which consist of all the buttons and the background
+// To store the input from user for calculation and display purposes
+// because the display and the actual formula itself might differ, thus it is necessary to seperate the operation and formula
+memory ={
+    operation: [],
+    formula: [],
+}
+
+// Event listener to update the display and memory of operation and formula
+// Event listener listen to clicks that occur in the input <div> which consist of all the buttons and the container containing the buttons.
 input_button_elem.addEventListener("click", event =>{
     const target = event.target;
     // Since the target is actually the parent of these button which is div with class=input, we need to check if the user is clicking a button. All button will have attribute type
@@ -54,26 +60,32 @@ input_button_elem.addEventListener("click", event =>{
             (eg. after performing 9+9 and click the = button to get a result of 18, user can press on a function like sin(
             or a number like 9 and the calculator will clear automatically without pressing the AC button 
             */
+            console.log("getOUtput" + getOutput_ans())
+            console.log(`type ${getOutput_ans() !== "" && (type == "num" || type == "func" || type == "trigo")}` )
             if (getOutput_ans() !== "" && (type == "num" || type == "func" || type == "trigo")) {
                 clearAll();
             }
-            // This condition allow all the button with a symbol attribute to be added on the display
-            // The only button with symbols are numbers, functions, operators and trigofunction
+
             // due to the way how parenthesis can be used as multiplication tools in most scientific calculators, 
             // we have to define conditions to allow parenthesis multiplication to happen
             // First step is to get the previously inserted formula
             const previous_formula = memory.formula[memory.formula.length -1];
+            // Check if the previous_formula has attribute type='num'
             const previous_isNum = isNum(previous_formula);
+            const current_isNum = Number.isInteger(parseInt(formula));
             // Multiplication can happen in 3 differetn conditions, x(x), (x)(x), and (x)x
             const multiply_before_parenthesis = previous_isNum && formula=="(";
-            const multiply_after_parenthesis = previous_formula == ")" && Number.isInteger(parseInt(formula));
+            const multiply_after_parenthesis = previous_formula == ")" && current_isNum
             const multiply_between_parenthesis = previous_formula == ")" && formula=="(";
             // Normal scientific calculator also allow something like xsin(x)
             const multiply_before_trigo = previous_isNum && type=="trigo";
+            // 2X
             const multiply_before_x = previous_isNum && formula=="x";
+            // 2e
             const multiply_before_e = previous_isNum && formula=="Math.E";
-            const multiply_after_e = previous_formula == "Math.E" && Number.isInteger(parseInt(formula));
-            // 10
+            // e2
+            const multiply_after_e = previous_formula == "Math.E" && current_isNum;
+            // 2log(2)
             const multiply_before_func = previous_isNum && type=="func";
             // Combine all the condition for ease of use
             const multiplication_conditions = 
@@ -82,7 +94,9 @@ input_button_elem.addEventListener("click", event =>{
                 multiply_before_func || multiply_before_e || multiply_after_e
                 );
 
+            // Only for buttons with attribute symbol="something"
             if(target.hasAttribute("symbol")){
+                // If any of the multiplication conditions is met, add * to the front of the formula
                 if (multiplication_conditions){
                     new_symbol = symbol;
                     new_formula = "*" + formula
@@ -111,12 +125,13 @@ function updateDisplay(symbol, formula){
 // Update the result column with the result of calculation
 // invoked only after calculation
 function updateResult(value){
+    // Set the result display with value
     setOutput_ans(value)
     console.log("updateResult:", output_ans_elem.innerHTML)
+    // Update var ANS
     setAns(value);
 }
 
-// memory.formula != []
 // Performing calculations by evaluating the formula inputed by the user in the memory
 function calculate() {
     if (memory.formula.length !== 0) {
@@ -132,16 +147,12 @@ function calculate() {
                 result = calcDeri(deriExpression, result);
             }
 
-            // Set Answer and update the result
-            setAns(result);
+            // Update display and ANS
             updateResult(result);
+         
+        // Alert user when error occur
         } catch (error) {
-            if (error instanceof SyntaxError) {
-                alert('Syntax Error: ' + error.message);
-            } else {
-                alert('An error occurred: ' + error.message);
-            }
-            clearAll();
+            alert(error);   
         }
     } else {
         console.log("Nothing to calculate");
@@ -196,23 +207,18 @@ function del(){
  */
 
 function clearAll(){
-    var currentValue = getOutput_display();
 
-    if (currentValue.length > 0) {
-        // Reset display at the top
-        setOutput_display("")
-        // Reset result display at the bottom
-        setOutput_ans("")
-        // Reset display and formula
-        memory.operation = []
-        memory.formula = []
-        console.log(memory.operation)
-        console.log(memory.formula)
-        // Reset number system to decimal
-        setNum_sys_mode("dec")
-    }else{
-        console.log("Nothing to remove")
-    }
+    // Reset display at the top
+    setOutput_display("")
+    // Reset result display at the bottom
+    setOutput_ans("")
+    // Reset display and formula
+    memory.operation = []
+    memory.formula = []
+    console.log(memory.operation)
+    console.log(memory.formula)
+    // Reset number system to decimal
+    setNum_sys_mode("dec")
 
     // Reset mode if necessary
     if(hyp){
@@ -225,11 +231,15 @@ function clearAll(){
 
 // Calculate derivation by using mathjs import
 function calcDeri(f, xValue) {
-    checkValidExpr(f)
+    if(checkValidExpr(f)){
+    // replace every occurance of ** into ^
     f = f.replace(/\*\*/g, '^');
+    // calculate the derivation function of f with constant x
     var derivative = math.derivative(f, 'x').toString();
+    // Evaluate the derivation function with the xValue from parameter
     const result = math.evaluate(derivative, { x: xValue });
     return result;
+    }
 }
 
 // store to expression to use it after user input x=
@@ -238,7 +248,7 @@ var deriExpression = "";
 function derivation(){
     if(memory.formula != []){
         expression = memory.formula.join("");
-        checkValidExpr(expression)
+        if (checkValidExpr(expression)) {
         // store to expression to use it after user input x=
         setDeriExpression(expression)
 
@@ -250,6 +260,7 @@ function derivation(){
         setOutput_ans("")
         memory.operation = []
         memory.formula = []
+        }
     }else{
         console.log("No expression to derive")
     }
@@ -301,129 +312,104 @@ function setHyp(value) {
     }
 }
 
+// Convert number system of result into another number system
 function numberSystem(type){
-    const noCalculatedValue = getOutput_ans() == ""
-    if(noCalculatedValue){
+    // if no result to be convert, nothing happen
+    if(getOutput_ans() == ""){
         console.log("nothing to change")
     }else{
-        currentNumber_System = getNum_sys_mode();
+        console.log(getOutput_ans())
         const value = getOutput_ans();
-        console.log("value" , value)
-        var dec_num = 0;
-
-        /*Convert everything to decimal first*/
-        switch (currentNumber_System) {
-            case "hex":
-                dec_num = hex2dec(value)
-                break;
-            case "oct":
-                dec_num = oct2dec(value)
-                break;
-            case "bin":
-                dec_num = bin2dec(value)
-                break;
-            case "dec":
-                dec_num = value;
-                break;
-        }
+        console.log(typeof getOutput_ans())
+        // Convert any number system back to decimal
+        const dec_num = convertToDecimal(value);
+    
         console.log("dec_num" ,dec_num)
+
+        // convert to different number systems
         switch (type) {
             case "hex":
-                hex_num = dec2hex(dec_num)
-                console.log(hex_num)
-                setNum_sys_mode("hex")
-                setOutput_ans(hex_num)
-                console.log(typeof hex_num)
+                // Convert to Hex
+                hex_num = dec2(dec_num,16);
+                setOutputAndMode(hex_num,"hex");
                 break;
             case "oct":
-                oct_num = dec2oct(dec_num)
-                setNum_sys_mode("oct")
-                setOutput_ans(oct_num)
-                console.log(oct_num)
-                console.log(typeof oct_num)
+                // Convert to Oct
+                oct_num = dec2(dec_num,8);
+                setOutputAndMode(oct_num,"oct");
                 break;
             case "bin":
-                bin_num = dec2bin(dec_num)
-                setNum_sys_mode("bin")
-                setOutput_ans(bin_num)
-                console.log(bin_num)
+                // Convert to Bin
+                bin_num = dec2(dec_num,2)
+                setOutputAndMode(bin_num,"bin");
                 break;
             case "dec":
-                setNum_sys_mode("dec")
-                setOutput_ans(dec_num)
-                console.log(dec_num)
+                // No extra convertion needed
+                setOutputAndMode(dec_num,"dec");
                 break;
         }
     }
 }
 
+// Convert any number system back to decimal
+function convertToDecimal(value) {
+    switch (getNum_sys_mode()) {
+        case "hex":
+            // Convert hexadecimal value back to decimal
+            return parseInt(value,16);
+        case "oct":
+            // Convert octodecimal value back to decimal
+            return parseInt(value,8);
+        case "bin":
+            // Convert binary value back to decimal
+            return parseInt(value,2);
+        case "dec":
+            return parseFloat(value);
+    }
+}
 
-function dec2bin(value){
-    // Define all the possible char for binary 
-    const binChars = "01";
-      
+// Convert from decimal to given number system
+function dec2(value,num){
+    var possibleChars = ""
+    // Get the possible char based on number system required
+    switch (num) {
+        case 2:
+            possibleChars = "01";
+            break;
+        case 8:
+            possibleChars = "01234567";
+            break;
+        case 16:
+            possibleChars = "0123456789ABCDEF";
+            break;
+        default:
+            console.log("Invalid number system mode");
+            return 0;
+    }
+
     // Define variables for the result
     var result = "";
-    
-    // Convert decimal into binary
+
+    // Convert decimal into given number system
     while (parseInt(value) > 0) {
-        var remainder = value % 2;
-        result = binChars[remainder] + result;
-        value = Math.floor(value / 2);
+        
+        // The first remainder is the index of the rightmost char in the result.
+        var remainder = value % num;
+
+        // Add the char to the result  e.g. 1 + 010 == 1010
+        result = possibleChars[remainder] + result;
+        
+        // Divide the value and loop
+        value = Math.floor(value / num);
     }
     return result;
 }
 
-function dec2hex(value){
-    // Define all the possible char for hexadecimal 
-    const hexChars = "0123456789ABCDEF";
-      
-    // Define variables for the result
-    var result = "";
-    
-    // Convert decimal into hexadecimal
-    while (parseInt(value) > 0) {
-        var remainder = value % 16;
-        result = hexChars[remainder] + result;
-        value = Math.floor(value / 16);
-    }
-    return result;
-}
-
-function dec2oct(value){
-    // Define all the possible char for octal
-    const octChars = "01234567";
-      
-    // Define variables for the result
-    var result = "";
-    
-    // Convert decimal into octal
-    while (parseInt(value) > 0) {
-        var remainder = value % 8;
-        result = octChars[remainder] + result;
-        value = Math.floor(value / 8);
-    }
-    return result;
-}
-
-function bin2dec(value){
-    return parseInt(value,2)
-}
-
-function hex2dec(value){
-    return parseInt(value,16)
-}
-
-function oct2dec(value){
-    return parseInt(value,8)
-}
-
-function getNum_sys_mode(){
-    return num_sys_mode_elem.innerHTML;
-}
-
-function setNum_sys_mode(value){
-    num_sys_mode_elem.innerHTML = value;
+// Set Current Number system mode, and the output
+function setOutputAndMode(output, mode) {
+    setNum_sys_mode(mode);
+    setOutput_ans(output);
+    console.log(output);
 }
 
 // Set the derivation mode to true / false
@@ -458,35 +444,71 @@ function memoryOperation(value) {
     // Combine formula
     const str = memory.formula.join("");
 
-    checkValidExpr(str)
+    if(checkValidExpr(str)){
+        let result = Function("return " + str)() || 0;
 
-    let result = Function("return " + str)();
-
-    switch (value) {    
-        // If the operation is plus
-        case "plus":
-            // Add result to memory
-            setM(getM() + result);
-            // Update result
-            updateResult("M → " + getM());
-            console.log(typeof value)
-            console.log(typeof getM())
-            console.log(typeof result)
-            break;
-        case "minus":
-            // Subtract result from memory
-            setM(getM() - result);
-            // Update result
-            updateResult("M → " + getM());
-            break;
-        case "clear":
-            // Reset Memory to 0
-            setM(0);
-            clearAll();
-            break;
-        default:
-            break;
+        switch (value) {    
+            // If the operation is plus
+            case "plus":
+                // Add result to memory
+                setM(getM() + result);
+                // Update result
+                updateResult("M → " + getM());
+                console.log(typeof value)
+                console.log(typeof getM())
+                console.log(typeof result)
+                break;
+            case "minus":
+                // Subtract result from memory
+                setM(getM() - result);
+                // Update result
+                updateResult("M → " + getM());
+                break;
+            case "clear":
+                // Reset Memory to 0
+                setM(0);
+                clearAll();
+                break;
+            default:
+                break;
+        }
     }
+}
+
+// Check if the parameter string is a valid expression
+function checkValidExpr(str) {
+    var valid = true;
+    try {
+        // Use Function constructor to create a function with 'x' as an argument
+        const check = new Function('x', 'return ' + str);
+
+    } catch (error) {
+        valid = false;
+        alert(error);   
+    }
+    return valid;
+}
+
+// Return true if the parameter is a button with type num
+function isNum(previous_formula){
+    for (let i = 0; i < all_num_button.length; i++) {
+        const button = all_num_button[i];
+        // Checking if the button with previous formula is a button with type="num"
+        if(button.getAttribute('formula') === previous_formula && button.getAttribute('type') === 'num'){
+            return true;
+        }
+    }
+    return false
+}
+
+// Getters and Setters
+
+function getNum_sys_mode(){
+    return num_sys_mode_elem.innerHTML;
+}
+
+function setNum_sys_mode(value){
+    num_sys_mode_elem.innerHTML = value;
 }
 
 function setOutput_display(value){
@@ -519,36 +541,4 @@ function getM(){
 
 function setM(value){
     M = value;
-}
-
-// Check if the parameter string is a valid expression
-function checkValidExpr(str) {
-    var valid = true;
-    try {
-        // Use Function constructor to create a function with 'x' as an argument
-        const check = new Function('x', 'return ' + str);
-
-    } catch (error) {
-        clearAll();
-        valid = false;
-        if (error instanceof SyntaxError) {
-            alert('Syntax Error: ' + error.message);
-            console.error('Syntax Error: ', error.message);
-        } else {
-            alert('Syntax Error: ' + error.message);
-            console.error('An error occurred: ' + error);
-        }
-    }
-    return valid;
-}
-
-// Return true if the parameter is a button with type num
-function isNum(previous_formula){
-    for (let i = 0; i < all_num_button.length; i++) {
-        const button = all_num_button[i];
-        if(button.getAttribute('formula') === previous_formula && button.getAttribute('type') === 'num'){
-            return true;
-        }
-    }
-    return false
 }
