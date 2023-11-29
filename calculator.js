@@ -1,4 +1,3 @@
-// Define all the constants and variables
 // Select the input HTML element that contains all the button
 const input_button_elem = document.querySelector(".input")
 // Select the display HTML element to alter the innerHTML 
@@ -20,7 +19,7 @@ var M = 0;
 // To store the input from user for calculation and display purposes
 // because the display and the actual formula itself might differ, thus it is necessary to seperate the operation and formula
 memory ={
-    operation: [],
+    operation: [],  
     formula: [],
 }
 // Store the state of hyper
@@ -28,27 +27,17 @@ var hyp = false;
 // Store the state of derivation, the calculator calculate value a bit differently under the deri mode on, see calculate() 
 var deri = false;
 
-function isNum(previous_formula){
-    for (let i = 0; i < all_num_button.length; i++) {
-        const button = all_num_button[i];
-        if(button.getAttribute('formula') === previous_formula.toString()){
-            return true;
-        }else{
-            return false;
-        }
-    }
-}
-
-//an event listener to update the display and memory of operation and formula
+// an event listener to update the display and memory of operation and formula
+// Event listener listen to clicks that occur in the input <div> which consist of all the buttons and the background
 input_button_elem.addEventListener("click", event =>{
     const target = event.target;
-    const symbol = target.getAttribute('symbol')
-    const formula = target.getAttribute('formula');
-    const type = target.getAttribute('type')
-
     // Since the target is actually the parent of these button which is div with class=input, we need to check if the user is clicking a button. All button will have attribute type
     // If this condition is not included, the rest of the function will be executed even when user is clicking in between the buttons
     if (target.hasAttribute('type')){
+        
+        const symbol = target.getAttribute('symbol')
+        const formula = target.getAttribute('formula');
+        const type = target.getAttribute('type')
         /*
         When the user press an operator immediately after calculating a value (eg. after performing 9+9 and click the = button to get a result of 18,
         the calculator allow the user to continue the calculation by performing the operation on the Ans (previously calculated value) )
@@ -74,20 +63,25 @@ input_button_elem.addEventListener("click", event =>{
             // we have to define conditions to allow parenthesis multiplication to happen
             // First step is to get the previously inserted formula
             const previous_formula = memory.formula[memory.formula.length -1];
-            const isNum = false;
+            const previous_isNum = isNum(previous_formula);
             // Multiplication can happen in 3 differetn conditions, x(x), (x)(x), and (x)x
-            const multiply_before_parenthesis = Number.isInteger(parseInt(previous_formula)) && formula=="(";
+            const multiply_before_parenthesis = previous_isNum && formula=="(";
             const multiply_after_parenthesis = previous_formula == ")" && Number.isInteger(parseInt(formula));
             const multiply_between_parenthesis = previous_formula == ")" && formula=="(";
             // Normal scientific calculator also allow something like xsin(x)
-            const multiply_before_trigo = Number.isInteger(parseInt(previous_formula)) && type=="trigo";
-            const multiply_before_x = Number.isInteger(parseInt(previous_formula)) && formula=="x";
-            const multiply_before_e = Number.isInteger(parseInt(previous_formula)) && formula=="Math.E";
+            const multiply_before_trigo = previous_isNum && type=="trigo";
+            const multiply_before_x = previous_isNum && formula=="x";
+            const multiply_before_e = previous_isNum && formula=="Math.E";
             const multiply_after_e = previous_formula == "Math.E" && Number.isInteger(parseInt(formula));
             // 10
-            const multiply_before_func = Number.isInteger(parseInt(previous_formula)) && type=="func";
+            const multiply_before_func = previous_isNum && type=="func";
             // Combine all the condition for ease of use
-            const multiplication_conditions = multiply_before_trigo || multiply_before_parenthesis || multiply_after_parenthesis || multiply_between_parenthesis || multiply_before_x || multiply_before_func || multiply_before_e || multiply_after_e
+            const multiplication_conditions = 
+                (
+                multiply_before_trigo || multiply_before_parenthesis || multiply_after_parenthesis || multiply_between_parenthesis || multiply_before_x || 
+                multiply_before_func || multiply_before_e || multiply_after_e
+                );
+
             if(target.hasAttribute("symbol")){
                 if (multiplication_conditions){
                     new_symbol = symbol;
@@ -99,22 +93,9 @@ input_button_elem.addEventListener("click", event =>{
             } 
         }
     }else{
-        console.log("not")
+        console.log("not a button")
     }
 })
-/*
- * User Manual for updating display:
- * 1. Press any button that has a symbol and a formula
- * 2. View the result of multiplication being updated to the result column
-*/
-
-/*
- * User Manual for parenthesis multiplication:
- * 1. Input something like 1(2) or (2)(2) or (2)2
- * 2. Press "=" button
- * 3. View the result of multiplication being updated to the result column
-*/
-
 
 // Update the display and push them into the memory tie to it which includes both operation and formula
 // Invoked every time when a valid button is pressed and updating the display is needed
@@ -134,29 +115,31 @@ function updateResult(value){
     console.log("updateResult:", output_ans_elem.innerHTML)
     setAns(value);
 }
+
 // memory.formula != []
 // Performing calculations by evaluating the formula inputed by the user in the memory
 function calculate() {
     if (memory.formula.length !== 0) {
+        // Combine the formula
         const str = memory.formula.join("");
-        console.log("formula: ", str);
-
+        console.log(`expression = ${str}`)
         try {
+            // Evaluate the expression
             let result = Function("return " + str)();
-            console.log("BigInt : " + result);
 
+            // If in derivation mode, calculate the derivation instead.
             if (deri) {
-                console.log(result);
                 result = calcDeri(deriExpression, result);
             }
 
+            // Set Answer and update the result
             setAns(result);
             updateResult(result);
         } catch (error) {
             if (error instanceof SyntaxError) {
                 alert('Syntax Error: ' + error.message);
             } else {
-                console.error('An error occurred: ' + error);
+                alert('An error occurred: ' + error.message);
             }
             clearAll();
         }
@@ -188,6 +171,14 @@ function del(){
     // Use a regular expression to find matches in the currentValue
     var matches = currentValue.match(pattern);
 
+    // Allow user to correct thier expression after the calculation, prevent the auto clear all by removing the output_display
+    if(getOutput_ans() != ""){
+        // Reset display at the to[]
+        setOutput_display("")
+        // Reset result display at the bottom
+        setOutput_ans("")
+    }
+
     if (matches && matches.length > 0) {
         // If there are matches, remove the last match from the currentValue
         var new_str = currentValue.slice(0, currentValue.lastIndexOf(matches[matches.length - 1]));
@@ -203,6 +194,34 @@ function del(){
  * 2. Press the "DEL" button
  * 3. View the pattern in the display column being deleted.
  */
+
+function clearAll(){
+    var currentValue = getOutput_display();
+
+    if (currentValue.length > 0) {
+        // Reset display at the top
+        setOutput_display("")
+        // Reset result display at the bottom
+        setOutput_ans("")
+        // Reset display and formula
+        memory.operation = []
+        memory.formula = []
+        console.log(memory.operation)
+        console.log(memory.formula)
+        // Reset number system to decimal
+        setNum_sys_mode("dec")
+    }else{
+        console.log("Nothing to remove")
+    }
+
+    // Reset mode if necessary
+    if(hyp){
+        setHyp(false)
+    }
+    if(deri){
+        setDeri(false)
+    }
+}
 
 // Calculate derivation by using mathjs import
 function calcDeri(f, xValue) {
@@ -222,9 +241,12 @@ function derivation(){
         checkValidExpr(expression)
         // store to expression to use it after user input x=
         setDeriExpression(expression)
-        console.log(deriExpression)
+
+        // Set the derivation mode to true
         setDeri(true)
+        // Prompt user to enter value of x
         setOutput_display("x=")
+        // Reset the answer, and displays and formula for the new input
         setOutput_ans("")
         memory.operation = []
         memory.formula = []
@@ -245,50 +267,37 @@ function getHyp(){
     return hyp;
 }
 
-function setHyp(value){
+function setHyp(value) {
     hyp = value;
     const length = all_trigo_button.length;
-    if(hyp == true){
-        for (let index = 0; index < length; index++) {
-            const element = all_trigo_button[index];
-            formula = element.getAttribute("formula");
-            symbol = element.getAttribute("symbol");
-            
-            inner = element.innerHTML;
-            console.log(typeof formula)
-            
-            formula_length = formula.length 
-            symbol_length = symbol.length
-            new_formula = formula.slice(0,formula_length-1) + "h("
-            new_symbol = symbol.slice(0,symbol_length-1) + "h("
-            new_inner = inner + "h"
+    // Iterate through every single trigonometry button
+    for (let index = 0; index < length; index++) {
+        const trigoButton = all_trigo_button[index];
+        let formula = trigoButton.getAttribute("formula");
+        let symbol = trigoButton.getAttribute("symbol");
+        let inner = trigoButton.innerHTML;
 
-            element.setAttribute("formula", new_formula)
-            element.setAttribute("symbol",new_symbol)
-            element.innerHTML = new_inner
+        if (hyp) {
+            // . match a char, $ is end of string, .$ is the last char
+            // Replace the last char into h(
+            formula = formula.replace(/.$/, "h(");
+            symbol = symbol.replace(/.$/, "h(");
+            // Add h into the button text sin to sinh
+            inner += "h";
             hyp_elem.style.display = 'block';
-        }
-    }else if(hyp == false){
-        for (let index = 0; index < length; index++) {
-            const element = all_trigo_button[index];
-            formula = element.getAttribute("formula");
-            symbol = element.getAttribute("symbol");
-            
-            inner = element.innerHTML;
-            console.log(typeof formula)
-            
-            formula_length = formula.length 
-            symbol_length = symbol.length
-
-            new_formula = formula.slice(0,formula_length-2) + "("
-            new_symbol = symbol.slice(0,symbol_length-2) + "("
-            new_inner = inner.slice(0,inner.length-1)
-
-            element.setAttribute("formula", new_formula)
-            element.setAttribute("symbol",new_symbol)
-            element.innerHTML = new_inner
+        } else {
+            // .. match 2 char, $ is end of string, ..$ is the last 2 char
+            // Replace the last 2 char into (
+            formula = formula.replace(/..$/, "(");
+            symbol = symbol.replace(/..$/, "(");
+            // Remove the last char, sinh to sin
+            inner = inner.slice(0, -1);
             hyp_elem.style.display = 'none';
         }
+        // Set the new formula and symbol to the button
+        trigoButton.setAttribute("formula", formula);
+        trigoButton.setAttribute("symbol", symbol);
+        trigoButton.innerHTML = inner;
     }
 }
 
@@ -417,6 +426,7 @@ function setNum_sys_mode(value){
     num_sys_mode_elem.innerHTML = value;
 }
 
+// Set the derivation mode to true / false
 function setDeri(value){
     deri = value;
     if (deri) {
@@ -444,54 +454,33 @@ function popMem(){
     console.log(memory.formula)
 }
 
-function clearAll(){
-    var currentValue = getOutput_display();
-
-    if (currentValue.length > 0) {
-        setOutput_display("")
-        setOutput_ans("")
-        memory.operation = []
-        memory.formula = []
-        console.log(memory.operation)
-        console.log(memory.formula)
-        setNum_sys_mode("dec")
-    }else{
-        console.log("Nothing to remove")
-    }
-
-    if(hyp){
-        setHyp(false)
-    }
-    if(deri){
-        setDeri(false)
-    }
-}
-
 function memoryOperation(value) {
+    // Combine formula
     const str = memory.formula.join("");
-    let result;
-    try {
-        result = Function("return " + str)();
-    } catch (error) {
-        if (error instanceof SyntaxError) {
-            alert('Syntax Error: ' + error.message);
-        } else {
-            console.error('An error occurred: ' + error);
-        }
-        clearAll();
-        return;
-    }
 
-    switch (value) {
+    checkValidExpr(str)
+
+    let result = Function("return " + str)();
+
+    switch (value) {    
+        // If the operation is plus
         case "plus":
+            // Add result to memory
             setM(getM() + result);
+            // Update result
             updateResult("M → " + getM());
+            console.log(typeof value)
+            console.log(typeof getM())
+            console.log(typeof result)
             break;
         case "minus":
+            // Subtract result from memory
             setM(getM() - result);
+            // Update result
             updateResult("M → " + getM());
             break;
         case "clear":
+            // Reset Memory to 0
             setM(0);
             clearAll();
             break;
@@ -532,6 +521,7 @@ function setM(value){
     M = value;
 }
 
+// Check if the parameter string is a valid expression
 function checkValidExpr(str) {
     var valid = true;
     try {
@@ -545,8 +535,20 @@ function checkValidExpr(str) {
             alert('Syntax Error: ' + error.message);
             console.error('Syntax Error: ', error.message);
         } else {
+            alert('Syntax Error: ' + error.message);
             console.error('An error occurred: ' + error);
         }
     }
     return valid;
+}
+
+// Return true if the parameter is a button with type num
+function isNum(previous_formula){
+    for (let i = 0; i < all_num_button.length; i++) {
+        const button = all_num_button[i];
+        if(button.getAttribute('formula') === previous_formula && button.getAttribute('type') === 'num'){
+            return true;
+        }
+    }
+    return false
 }
